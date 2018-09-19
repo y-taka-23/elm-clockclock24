@@ -1,4 +1,4 @@
-module Model exposing (Model, Msg(..), init)
+module Model exposing (Clock, Digit, Display, Model, Msg(..), init)
 
 import List.Extra as List
 
