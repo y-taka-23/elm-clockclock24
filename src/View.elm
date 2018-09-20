@@ -7,8 +7,10 @@ import Svg.Attributes exposing (..)
 
 
 view : Model -> Html Msg
-view _ =
-    div [] [ Html.text "Hello, Elm!" ]
+view model =
+    div [ id "display-frame" ]
+        [ display { x = 0, y = 0, padding = 10, radius = 80 } model.displayed
+        ]
 
 
 type alias ClockPosition =
@@ -23,8 +25,8 @@ clock pos cl =
     g []
         [ dial pos
         , centerPoint pos
-        , hourHand pos cl
         , minuteHand pos cl
+        , hourHand pos cl
         ]
 
 
@@ -45,7 +47,6 @@ centerPoint pos =
         [ class "clock-center-point"
         , cx <| String.fromInt pos.centerX
         , cy <| String.fromInt pos.centerY
-        , r <| String.fromInt pos.radius
         ]
         []
 
@@ -98,40 +99,44 @@ type alias DigitPosition =
 
 digit : DigitPosition -> Digit -> Svg msg
 digit pos d =
+    let
+        offset =
+            pos.radius + pos.padding
+    in
     g []
         [ clock
-            { centerX = pos.x
-            , centerY = pos.y
+            { centerX = pos.x + offset
+            , centerY = pos.y + offset
             , radius = pos.radius
             }
             d.topLeft
         , clock
-            { centerX = pos.x
-            , centerY = pos.y * 3 * pos.radius + 3 * pos.padding
+            { centerX = pos.x + offset
+            , centerY = pos.y + 3 * offset
             , radius = pos.radius
             }
             d.middleLeft
         , clock
-            { centerX = pos.x
-            , centerY = pos.y * 5 * pos.radius + 5 * pos.padding
+            { centerX = pos.x + offset
+            , centerY = pos.y + 5 * offset
             , radius = pos.radius
             }
             d.bottomLeft
         , clock
-            { centerX = pos.x + 3 * pos.radius + 3 * pos.padding
-            , centerY = pos.y
+            { centerX = pos.x + 3 * offset
+            , centerY = pos.y + offset
             , radius = pos.radius
             }
             d.topRight
         , clock
-            { centerX = pos.x + 3 * pos.radius + 3 * pos.padding
-            , centerY = pos.y * 3 * pos.radius + 3 * pos.padding
+            { centerX = pos.x + 3 * offset
+            , centerY = pos.y + 3 * offset
             , radius = pos.radius
             }
             d.middleRight
         , clock
-            { centerX = pos.x + 3 * pos.radius + 3 * pos.padding
-            , centerY = pos.y * 5 * pos.radius + 5 * pos.padding
+            { centerX = pos.x + 3 * offset
+            , centerY = pos.y + 5 * offset
             , radius = pos.radius
             }
             d.bottomRight
@@ -148,11 +153,10 @@ display pos dis =
         [ id "display"
         , viewBox <|
             String.join " " <|
-                List.map String.fromInt <|
-                    [ 0, 0, 4 * offset, 6 * pos.radius + 6 * pos.padding ]
+                List.map String.fromInt [ 0, 0, 8 * offset, 3 * offset ]
         ]
         [ digit { pos | x = 0, y = 0 } dis.d1
-        , digit { pos | x = offset, y = 0 } dis.d2
-        , digit { pos | x = 2 * offset, y = 0 } dis.d3
-        , digit { pos | x = 3 * offset, y = 0 } dis.d4
+        , digit { pos | x = 2 * offset, y = 0 } dis.d2
+        , digit { pos | x = 4 * offset, y = 0 } dis.d3
+        , digit { pos | x = 6 * offset, y = 0 } dis.d4
         ]
