@@ -9,7 +9,7 @@ import Svg.Attributes exposing (..)
 view : Model -> Html Msg
 view model =
     div [ id "display-frame" ]
-        [ display { x = 0, y = 0, padding = 10, radius = 80 } model.displayed
+        [ display { x = 0, y = 0, padding = 4, radius = 80 } model.displayed
         ]
 
 
@@ -24,9 +24,9 @@ clock : ClockPosition -> Clock -> Svg msg
 clock pos cl =
     g []
         [ dial pos
-        , centerPoint pos
-        , minuteHand pos cl
         , hourHand pos cl
+        , minuteHand pos cl
+        , centerPoint pos
         ]
 
 
@@ -55,7 +55,7 @@ hourHand : ClockPosition -> Clock -> Svg msg
 hourHand pos cl =
     let
         l =
-            toFloat pos.radius * 0.95
+            toFloat pos.radius * 0.85
 
         deg =
             degrees cl.hour
@@ -74,7 +74,7 @@ minuteHand : ClockPosition -> Clock -> Svg msg
 minuteHand pos cl =
     let
         l =
-            toFloat pos.radius * 0.85
+            toFloat pos.radius * 0.95
 
         deg =
             degrees cl.minute

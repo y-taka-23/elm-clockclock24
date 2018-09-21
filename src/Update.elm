@@ -18,7 +18,9 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update (NewFrame time) model =
     case model.transition of
         Nothing ->
-            ( { model | displayed = Model.posixToDisplay time }, Cmd.none )
+            ( { model | displayed = posixToDisplay model.zone time }
+            , Cmd.none
+            )
 
         Just tr ->
             let
@@ -26,11 +28,13 @@ update (NewFrame time) model =
                     Time.posixToMillis time
             in
             if current < Time.posixToMillis tr.style.startAt then
-                ( { model | displayed = posixToDisplay time }, Cmd.none )
+                ( { model | displayed = posixToDisplay model.zone time }
+                , Cmd.none
+                )
 
             else if Time.posixToMillis tr.style.endAt < current then
                 ( { model
-                    | displayed = posixToDisplay time
+                    | displayed = posixToDisplay model.zone time
                     , transition = Nothing
                   }
                 , Cmd.none

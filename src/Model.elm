@@ -21,6 +21,7 @@ type Msg
 type alias Model =
     { displayed : Display
     , transition : Maybe Transition
+    , zone : Time.Zone
     }
 
 
@@ -28,6 +29,7 @@ init : Model
 init =
     { displayed = noDigits
     , transition = Nothing
+    , zone = Time.utc
     }
 
 
@@ -225,9 +227,20 @@ noDigits =
     }
 
 
-posixToDisplay : Time.Posix -> Display
-posixToDisplay _ =
-    noDigits
+posixToDisplay : Time.Zone -> Time.Posix -> Display
+posixToDisplay zone time =
+    let
+        hour =
+            Time.toHour zone time
+
+        minute =
+            Time.toMinute zone time
+    in
+    { d1 = toDigit <| hour // 10
+    , d2 = toDigit <| modBy 10 hour
+    , d3 = toDigit <| minute // 10
+    , d4 = toDigit <| modBy 10 minute
+    }
 
 
 type alias Transition =
