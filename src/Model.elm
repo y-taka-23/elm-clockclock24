@@ -1,20 +1,33 @@
-module Model exposing (Clock, Digit, Display, Model, Msg(..), init)
+module Model exposing
+    ( Clock
+    , Digit
+    , Display
+    , Model
+    , Msg(..)
+    , Transition
+    , TransitionStyle
+    , init
+    , posixToDisplay
+    )
 
 import List.Extra as List
+import Time
 
 
 type Msg
-    = NoOp
+    = NewFrame Time.Posix
 
 
 type alias Model =
     { displayed : Display
+    , transition : Maybe Transition
     }
 
 
 init : Model
 init =
     { displayed = noDigits
+    , transition = Nothing
     }
 
 
@@ -210,3 +223,53 @@ noDigits =
     , d3 = unknown
     , d4 = unknown
     }
+
+
+posixToDisplay : Time.Posix -> Display
+posixToDisplay _ =
+    noDigits
+
+
+type alias Transition =
+    { style : TransitionStyle
+    , from : Display
+    , to : Display
+    }
+
+
+type alias TransitionStyle =
+    { startAt : Time.Posix
+    , endAt : Time.Posix
+    , easing : Easing
+    , hourDir : Direction
+    , minuteDir : Direction
+    , hourRot : Int
+    , minuteRot : Int
+    }
+
+
+type alias Easing =
+    Float -> Float
+
+
+squareInOut : Easing
+squareInOut x =
+    if x < 1 / 2 then
+        2 * x ^ 2
+
+    else
+        1 - 2 * (1 - x) ^ 2
+
+
+type alias Direction =
+    Float
+
+
+cw : Direction
+cw =
+    1
+
+
+ccw : Direction
+ccw =
+    -1

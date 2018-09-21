@@ -1,6 +1,7 @@
 module Effect exposing (init, subscriptions)
 
-import Model exposing (Model, Msg)
+import Browser.Events as Browser
+import Model exposing (Model, Msg(..))
 
 
 init : Cmd Msg
@@ -10,4 +11,4 @@ init =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Browser.onAnimationFrame NewFrame
