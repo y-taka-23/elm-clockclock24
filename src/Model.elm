@@ -15,7 +15,8 @@ import Time
 
 
 type Msg
-    = NewFrame Time.Posix
+    = SetSystemTime ( Time.Zone, Time.Posix )
+    | NewFrame Time.Posix
 
 
 type alias Model =

@@ -15,33 +15,43 @@ import Time
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update (NewFrame time) model =
-    case model.transition of
-        Nothing ->
-            ( { model | displayed = posixToDisplay model.zone time }
+update msg model =
+    case msg of
+        SetSystemTime ( zone, time ) ->
+            ( { model
+                | zone = zone
+                , displayed = posixToDisplay zone time
+              }
             , Cmd.none
             )
 
-        Just tr ->
-            let
-                current =
-                    Time.posixToMillis time
-            in
-            if current < Time.posixToMillis tr.style.startAt then
-                ( { model | displayed = posixToDisplay model.zone time }
-                , Cmd.none
-                )
+        NewFrame time ->
+            case model.transition of
+                Nothing ->
+                    ( { model | displayed = posixToDisplay model.zone time }
+                    , Cmd.none
+                    )
 
-            else if Time.posixToMillis tr.style.endAt < current then
-                ( { model
-                    | displayed = posixToDisplay model.zone time
-                    , transition = Nothing
-                  }
-                , Cmd.none
-                )
+                Just tr ->
+                    let
+                        current =
+                            Time.posixToMillis time
+                    in
+                    if current < Time.posixToMillis tr.style.startAt then
+                        ( { model | displayed = posixToDisplay model.zone time }
+                        , Cmd.none
+                        )
 
-            else
-                ( { model | displayed = inbetween tr time }, Cmd.none )
+                    else if Time.posixToMillis tr.style.endAt < current then
+                        ( { model
+                            | displayed = posixToDisplay model.zone time
+                            , transition = Nothing
+                          }
+                        , Cmd.none
+                        )
+
+                    else
+                        ( { model | displayed = inbetween tr time }, Cmd.none )
 
 
 inbetween : Transition -> Time.Posix -> Display
