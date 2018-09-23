@@ -1,13 +1,12 @@
 module Model exposing
     ( Clock
     , Digit
+    , Direction(..)
     , Display
     , Model
     , Msg(..)
     , Transition
     , TransitionStyle
-    , ccw
-    , cw
     , init
     , posixToDisplay
     )
@@ -268,15 +267,6 @@ type alias Easing =
     Float -> Float
 
 
-type alias Direction =
-    Float
-
-
-cw : Direction
-cw =
-    1
-
-
-ccw : Direction
-ccw =
-    -1
+type Direction
+    = CW
+    | CCW

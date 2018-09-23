@@ -4,13 +4,12 @@ import Model
     exposing
         ( Clock
         , Digit
+        , Direction(..)
         , Display
         , Model
         , Msg(..)
         , Transition
         , TransitionStyle
-        , ccw
-        , cw
         , posixToDisplay
         )
 import Time
@@ -31,7 +30,7 @@ update msg model =
         NewFrame time ->
             case model.transition of
                 Nothing ->
-                    if Time.toSecond model.zone time > 40 then
+                    if Time.toSecond model.zone time > 45 then
                         ( { model
                             | displayed = posixToDisplay model.zone time
                             , transition = Just <| defaultMove model.zone time
@@ -74,17 +73,17 @@ defaultMove zone start =
 
         squareInOut x =
             if x < 1 / 2 then
-                2 * x ^ 2
+                2 * (x ^ 2)
 
             else
-                1 - 2 * (1 - x) ^ 2
+                1 - 2 * ((1 - x) ^ 2)
     in
     { style =
         { startAt = start
         , endAt = end
         , easing = squareInOut
-        , hourDir = cw
-        , minuteDir = ccw
+        , hourDir = CW
+        , minuteDir = CCW
         , hourRot = 1
         , minuteRot = 1
         }
@@ -128,12 +127,30 @@ inbetweenClock style from to time =
         progress =
             style.easing <| (current - start) / (end - start)
 
-        hourTo =
-            style.hourDir * (to.hour + toFloat (style.hourRot * 360))
+        ( hourFrom, hourTo ) =
+            case style.hourDir of
+                CW ->
+                    ( from.hour
+                    , to.hour + toFloat (style.hourRot * 360)
+                    )
 
-        minuteTo =
-            style.minuteDir * (to.minute + toFloat (style.minuteRot * 360))
+                CCW ->
+                    ( from.hour - 360
+                    , to.hour - 360 - toFloat (style.hourRot * 360)
+                    )
+
+        ( minuteFrom, minuteTo ) =
+            case style.minuteDir of
+                CW ->
+                    ( from.minute
+                    , to.minute + toFloat (style.minuteRot * 360)
+                    )
+
+                CCW ->
+                    ( from.minute - 360
+                    , to.minute - 360 - toFloat (style.minuteRot * 360)
+                    )
     in
-    { hour = from.hour + progress * (hourTo - from.hour)
-    , minute = from.minute + progress * (minuteTo - from.minute)
+    { hour = hourFrom + progress * (hourTo - hourFrom)
+    , minute = minuteFrom + progress * (minuteTo - minuteFrom)
     }
