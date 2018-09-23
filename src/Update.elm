@@ -9,9 +9,12 @@ import Model
         , Msg(..)
         , Transition
         , TransitionStyle
+        , ccw
+        , cw
         , posixToDisplay
         )
 import Time
+import Time.Extra as Time
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -28,9 +31,18 @@ update msg model =
         NewFrame time ->
             case model.transition of
                 Nothing ->
-                    ( { model | displayed = posixToDisplay model.zone time }
-                    , Cmd.none
-                    )
+                    if Time.toSecond model.zone time > 40 then
+                        ( { model
+                            | displayed = posixToDisplay model.zone time
+                            , transition = Just <| defaultMove model.zone time
+                          }
+                        , Cmd.none
+                        )
+
+                    else
+                        ( { model | displayed = posixToDisplay model.zone time }
+                        , Cmd.none
+                        )
 
                 Just tr ->
                     let
@@ -42,7 +54,7 @@ update msg model =
                         , Cmd.none
                         )
 
-                    else if Time.posixToMillis tr.style.endAt < current then
+                    else if Time.posixToMillis tr.style.endAt <= current then
                         ( { model
                             | displayed = posixToDisplay model.zone time
                             , transition = Nothing
@@ -52,6 +64,33 @@ update msg model =
 
                     else
                         ( { model | displayed = inbetween tr time }, Cmd.none )
+
+
+defaultMove : Time.Zone -> Time.Posix -> Transition
+defaultMove zone start =
+    let
+        end =
+            Time.floor Time.Minute zone <| Time.add Time.Minute 1 zone start
+
+        squareInOut x =
+            if x < 1 / 2 then
+                2 * x ^ 2
+
+            else
+                1 - 2 * (1 - x) ^ 2
+    in
+    { style =
+        { startAt = start
+        , endAt = end
+        , easing = squareInOut
+        , hourDir = cw
+        , minuteDir = ccw
+        , hourRot = 1
+        , minuteRot = 1
+        }
+    , from = posixToDisplay zone start
+    , to = posixToDisplay zone end
+    }
 
 
 inbetween : Transition -> Time.Posix -> Display

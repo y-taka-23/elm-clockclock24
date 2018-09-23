@@ -6,6 +6,8 @@ module Model exposing
     , Msg(..)
     , Transition
     , TransitionStyle
+    , ccw
+    , cw
     , init
     , posixToDisplay
     )
@@ -264,15 +266,6 @@ type alias TransitionStyle =
 
 type alias Easing =
     Float -> Float
-
-
-squareInOut : Easing
-squareInOut x =
-    if x < 1 / 2 then
-        2 * x ^ 2
-
-    else
-        1 - 2 * (1 - x) ^ 2
 
 
 type alias Direction =
