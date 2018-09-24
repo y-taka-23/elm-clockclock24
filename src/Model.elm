@@ -22,7 +22,7 @@ type Msg
 
 type alias Model =
     { displayed : Display
-    , transition : Maybe Transition
+    , transitions : List Transition
     , zone : Time.Zone
     }
 
@@ -30,7 +30,7 @@ type alias Model =
 init : Model
 init =
     { displayed = noDigits
-    , transition = Nothing
+    , transitions = []
     , zone = Time.utc
     }
 

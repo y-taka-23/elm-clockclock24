@@ -28,12 +28,24 @@ update msg model =
             )
 
         NewFrame time ->
-            case model.transition of
-                Nothing ->
-                    if Time.toSecond model.zone time > 45 then
+            case model.transitions of
+                [] ->
+                    let
+                        sec =
+                            Time.toSecond model.zone time
+                    in
+                    if 10 < sec && sec < 15 then
                         ( { model
                             | displayed = posixToDisplay model.zone time
-                            , transition = Just <| defaultMove model.zone time
+                            , transitions = spinMove model.zone time
+                          }
+                        , Cmd.none
+                        )
+
+                    else if sec > 45 then
+                        ( { model
+                            | displayed = posixToDisplay model.zone time
+                            , transitions = minuteMove model.zone time
                           }
                         , Cmd.none
                         )
@@ -43,33 +55,41 @@ update msg model =
                         , Cmd.none
                         )
 
-                Just tr ->
+                tr :: trs ->
                     let
                         current =
                             Time.posixToMillis time
                     in
                     if current < Time.posixToMillis tr.style.startAt then
-                        ( { model | displayed = posixToDisplay model.zone time }
-                        , Cmd.none
-                        )
+                        ( model, Cmd.none )
 
                     else if Time.posixToMillis tr.style.endAt <= current then
-                        ( { model
-                            | displayed = posixToDisplay model.zone time
-                            , transition = Nothing
-                          }
-                        , Cmd.none
-                        )
+                        ( { model | transitions = trs }, Cmd.none )
 
                     else
                         ( { model | displayed = inbetween tr time }, Cmd.none )
 
 
-defaultMove : Time.Zone -> Time.Posix -> Transition
-defaultMove zone start =
+minuteMove : Time.Zone -> Time.Posix -> List Transition
+minuteMove zone start =
     let
         end =
             Time.floor Time.Minute zone <| Time.add Time.Minute 1 zone start
+    in
+    [ { style =
+            { startAt = start
+            , endAt = end
+            , easing = squareInOut
+            , hourDir = CW
+            , minuteDir = CCW
+            , hourRot = 1
+            , minuteRot = 1
+            }
+      , from = posixToDisplay zone start
+      , to = posixToDisplay zone end
+      }
+    ]
+
 
         squareInOut x =
             if x < 1 / 2 then
@@ -90,6 +110,30 @@ defaultMove zone start =
     , from = posixToDisplay zone start
     , to = posixToDisplay zone end
     }
+
+
+squareInOut : Easing
+squareInOut x =
+    if x < 1 / 2 then
+        2 * (x ^ 2)
+
+    else
+        1 - 2 * ((1 - x) ^ 2)
+
+
+squareIn : Easing
+squareIn x =
+    x ^ 2
+
+
+squareOut : Easing
+squareOut x =
+    1 - (1 - x) ^ 2
+
+
+linear : Easing
+linear x =
+    x
 
 
 inbetween : Transition -> Time.Posix -> Display
