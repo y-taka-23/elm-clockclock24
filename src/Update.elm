@@ -6,6 +6,7 @@ import Model
         , Digit
         , Direction(..)
         , Display
+        , Easing
         , Model
         , Msg(..)
         , Transition
@@ -91,24 +92,132 @@ minuteMove zone start =
     ]
 
 
-        squareInOut x =
-            if x < 1 / 2 then
-                2 * (x ^ 2)
+spinMove : Time.Zone -> Time.Posix -> List Transition
+spinMove zone start =
+    let
+        t1 =
+            Time.add Time.Second 7 zone start
 
-            else
-                1 - 2 * ((1 - x) ^ 2)
+        t2 =
+            Time.add Time.Second 5 zone t1
+
+        t3 =
+            Time.add Time.Second 7 zone t2
+
+        end =
+            Time.add Time.Second 7 zone t3
+
+        align =
+            { style =
+                { startAt = start
+                , endAt = t1
+                , easing = squareInOut
+                , hourDir = CCW
+                , minuteDir = CW
+                , hourRot = 0
+                , minuteRot = 0
+                }
+            , from = posixToDisplay zone start
+            , to = prespinPosition
+            }
+
+        prespin =
+            { style =
+                { startAt = t1
+                , endAt = t2
+                , easing = squareIn
+                , hourDir = CCW
+                , minuteDir = CCW
+                , hourRot = 0
+                , minuteRot = 0
+                }
+            , from = prespinPosition
+            , to = spinPosition
+            }
+
+        spin =
+            { style =
+                { startAt = t2
+                , endAt = t3
+                , easing = linear
+                , hourDir = CCW
+                , minuteDir = CCW
+                , hourRot = 1
+                , minuteRot = 1
+                }
+            , from = spinPosition
+            , to = spinPosition
+            }
+
+        recover =
+            { style =
+                { startAt = t3
+                , endAt = end
+                , easing = squareOut
+                , hourDir = CCW
+                , minuteDir = CCW
+                , hourRot = 0
+                , minuteRot = 0
+                }
+            , from = spinPosition
+            , to = posixToDisplay zone end
+            }
     in
-    { style =
-        { startAt = start
-        , endAt = end
-        , easing = squareInOut
-        , hourDir = CW
-        , minuteDir = CCW
-        , hourRot = 1
-        , minuteRot = 1
+    [ align, prespin, spin, recover ]
+
+
+prespinPosition : Display
+prespinPosition =
+    let
+        cl =
+            { hour = 225, minute = 45 }
+
+        d =
+            { topLeft = cl
+            , middleLeft = cl
+            , bottomLeft = cl
+            , topRight = cl
+            , middleRight = cl
+            , bottomRight = cl
+            }
+    in
+    { d1 = d, d2 = d, d3 = d, d4 = d }
+
+
+spinPosition : Display
+spinPosition =
+    { d1 =
+        { topLeft = { hour = 45, minute = 225 }
+        , middleLeft = { hour = 45, minute = 225 }
+        , bottomLeft = { hour = 45, minute = 225 }
+        , topRight = { hour = 60, minute = 240 }
+        , middleRight = { hour = 60, minute = 240 }
+        , bottomRight = { hour = 60, minute = 240 }
         }
-    , from = posixToDisplay zone start
-    , to = posixToDisplay zone end
+    , d2 =
+        { topLeft = { hour = 75, minute = 255 }
+        , middleLeft = { hour = 75, minute = 255 }
+        , bottomLeft = { hour = 75, minute = 255 }
+        , topRight = { hour = 90, minute = 270 }
+        , middleRight = { hour = 90, minute = 270 }
+        , bottomRight = { hour = 90, minute = 270 }
+        }
+    , d3 =
+        { topLeft = { hour = 105, minute = 285 }
+        , middleLeft = { hour = 105, minute = 285 }
+        , bottomLeft = { hour = 105, minute = 285 }
+        , topRight = { hour = 120, minute = 300 }
+        , middleRight = { hour = 120, minute = 300 }
+        , bottomRight = { hour = 120, minute = 300 }
+        }
+    , d4 =
+        { topLeft = { hour = 135, minute = 315 }
+        , middleLeft = { hour = 135, minute = 315 }
+        , bottomLeft = { hour = 135, minute = 315 }
+        , topRight = { hour = 150, minute = 330 }
+        , middleRight = { hour = 150, minute = 330 }
+        , bottomRight = { hour = 150, minute = 330 }
+        }
     }
 
 

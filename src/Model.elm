@@ -3,6 +3,7 @@ module Model exposing
     , Digit
     , Direction(..)
     , Display
+    , Easing
     , Model
     , Msg(..)
     , Transition
