@@ -130,25 +130,57 @@ inbetweenClock style from to time =
         ( hourFrom, hourTo ) =
             case style.hourDir of
                 CW ->
+                    let
+                        rot =
+                            if from.hour > to.hour then
+                                style.hourRot + 1
+
+                            else
+                                style.hourRot
+                    in
                     ( from.hour
-                    , to.hour + toFloat (style.hourRot * 360)
+                    , to.hour + toFloat (rot * 360)
                     )
 
                 CCW ->
+                    let
+                        rot =
+                            if from.hour < to.hour then
+                                style.hourRot + 1
+
+                            else
+                                style.hourRot
+                    in
                     ( from.hour - 360
-                    , to.hour - 360 - toFloat (style.hourRot * 360)
+                    , to.hour - 360 - toFloat (rot * 360)
                     )
 
         ( minuteFrom, minuteTo ) =
             case style.minuteDir of
                 CW ->
+                    let
+                        rot =
+                            if from.minute < to.minute then
+                                style.minuteRot + 1
+
+                            else
+                                style.minuteRot
+                    in
                     ( from.minute
-                    , to.minute + toFloat (style.minuteRot * 360)
+                    , to.minute + toFloat (rot * 360)
                     )
 
                 CCW ->
+                    let
+                        rot =
+                            if from.minute < to.minute then
+                                style.minuteRot + 1
+
+                            else
+                                style.minuteRot
+                    in
                     ( from.minute - 360
-                    , to.minute - 360 - toFloat (style.minuteRot * 360)
+                    , to.minute - 360 - toFloat (rot * 360)
                     )
     in
     { hour = hourFrom + progress * (hourTo - hourFrom)
