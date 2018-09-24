@@ -1,7 +1,7 @@
 {
   "name": "elm-clockclock24",
   "version": "1.0.0",
-  "description": "A digital clock consists of 24 analog clocks.",
+  "description": "An Elm homage to ClockClock 24 by Humans since 1982.",
   "main": "src/index.js",
   "scripts": {
     "build": "webpack --mode production",
